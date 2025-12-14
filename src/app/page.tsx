@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -274,7 +274,7 @@ export default function Portfolio() {
           ].map((item) => (
             <motion.button
               key={item.id}
-              ref={(el) => (btnRefs.current[item.id] = el)}
+              ref={(el) => { btnRefs.current[item.id] = el as HTMLButtonElement | null; }}
               onClick={() => handleNav(item.id)}
               whileHover={hoverLift}
               whileTap={tapPop}
@@ -324,7 +324,7 @@ export default function Portfolio() {
                 Experienced in transforming complex ideas into clean, user-focused digital solutions.
               </motion.p>
               <motion.p variants={itemVariants} className="mt-5 text-sm text-white/70">
-                Full-Stack Development • Problem Solving • System Design • AI-Driven Applications
+                Full-Stack Development â€¢ Problem Solving â€¢ System Design â€¢ AI-Driven Applications
               </motion.p>
               <motion.div variants={itemVariants} className="mt-6 flex flex-wrap gap-3">
                 <button
@@ -396,8 +396,8 @@ export default function Portfolio() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h3 className="text-xl font-semibold">B.E. Computer Science and Engineering</h3>
-                <p className="mt-1 text-white/80">Easwari Engineering College • Chennai</p>
-                <p className="mt-1 text-white/60">2024 – 2028</p>
+                <p className="mt-1 text-white/80">Easwari Engineering College â€¢ Chennai</p>
+                <p className="mt-1 text-white/60">2024 â€“ 2028</p>
               </div>
               <div className="md:text-right">
                 <div className="text-sm text-white/60">CGPA (Current)</div>
@@ -565,11 +565,11 @@ export default function Portfolio() {
                   className="absolute top-4 right-4 text-white/70 hover:text-white"
                   aria-label="Close"
                 >
-                  ✕
+                  âœ•
                 </button>
 
                 <h3 className="text-2xl font-bold">{selectedCert.title}</h3>
-                <p className="mt-2 text-white/80">{selectedCert.platform}{selectedCert.year ? ` • ${selectedCert.year}` : ""}</p>
+                <p className="mt-2 text-white/80">{selectedCert.platform}{selectedCert.year ? ` â€¢ ${selectedCert.year}` : ""}</p>
                 {selectedCert.credentialId && (
                   <p className="mt-2 text-white/70">Credential ID: {selectedCert.credentialId}</p>
                 )}
@@ -623,7 +623,7 @@ export default function Portfolio() {
                   onClick={() => setSelectedProject(null)}
                   className="absolute top-4 right-4 text-white/70 hover:text-white"
                 >
-                  ✕
+                  âœ•
                 </button>
 
                 <h2 className="text-2xl font-bold">{selectedProject.title}</h2>
@@ -835,7 +835,7 @@ export default function Portfolio() {
             >
               <h3 className="text-xl font-semibold">{p.title}</h3>
               <p className="text-white/70 mt-3">{p.desc}</p>
-              <p className="mt-4 text-cyan-300 text-sm">Click to view more →</p>
+              <p className="mt-4 text-cyan-300 text-sm">Click to view more â†’</p>
               <span className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <span className="pointer-events-none absolute -inset-px rounded-2xl shadow-[0_0_40px_0_rgba(59,130,246,0.18),0_0_2px_0_rgba(59,130,246,0.35)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
@@ -887,3 +887,4 @@ export default function Portfolio() {
     </div>
   );
 }
+
