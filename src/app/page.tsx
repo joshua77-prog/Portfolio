@@ -62,6 +62,7 @@ type HorizontalProject = {
   title: string;
   domain: ProjectDomain;
   tag: string;
+  category: string;
   description: string;
   imageSrc: string;
 };
@@ -72,6 +73,7 @@ const horizontalProjects: HorizontalProject[] = [
     title: "Blood Connect — Real-Time Emergency Blood Donor Network",
     domain: "health",
     tag: "Health-tech",
+    category: "Health-Tech",
     description:
       "Real-time donor discovery platform that helps recipients locate nearby donors and connect instantly during emergencies.",
     imageSrc: "/profile/projects/blood-connect.png",
@@ -81,6 +83,7 @@ const horizontalProjects: HorizontalProject[] = [
     title: "Heal Hub — QR-Based Smart Prescription & Medicine Access Platform",
     domain: "health",
     tag: "Health-tech",
+    category: "Health-Tech",
     description:
       "Digital prescription and smart medicine access platform with secure QR prescriptions and smart medicine dispensing.",
     imageSrc: "/profile/projects/heal-hub.png",
@@ -90,6 +93,7 @@ const horizontalProjects: HorizontalProject[] = [
     title: "CartVision AI — Smart Retail Cart & Vision-Based Checkout System",
     domain: "ai",
     tag: "AI Project",
+    category: "AI",
     description:
       "AI-powered smart shopping cart that uses computer vision to detect items and enable checkout-free retail experiences.",
     imageSrc: "/profile/projects/cartvision-ai.png",
@@ -99,6 +103,7 @@ const horizontalProjects: HorizontalProject[] = [
     title: "AI-Based Quality Control & Defect Detection System",
     domain: "industrial",
     tag: "Industrial AI",
+    category: "Industrial",
     description:
       "Computer vision and AI system that automatically detects manufacturing defects in real time on production lines.",
     imageSrc: "/profile/projects/ai-defect-detection.png",
@@ -108,6 +113,7 @@ const horizontalProjects: HorizontalProject[] = [
     title: "Safe Streets — Smart Wearable Safety System",
     domain: "iot",
     tag: "IoT + App",
+    category: "IoT",
     description:
       "A smart wearable safety system providing SOS alerts and real-time location tracking during emergencies.",
     imageSrc: "/profile/projects/safe-streets.png",
@@ -1241,7 +1247,7 @@ export default function Portfolio() {
                             title: project.title,
                             desc: project.description,
                             full: project.description,
-                            subtitle: categoryLabel,
+                            subtitle: project.category,
                             tech: project.tag ? [project.tag] : undefined,
                           });
                         }
