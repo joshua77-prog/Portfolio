@@ -29,6 +29,13 @@ type Cert = {
   link?: string;
 };
 
+type Internship = {
+  title: string;
+  organization: string;
+  duration: string;
+  description?: string;
+};
+
 const certifications: Cert[] = [
   { title: "Core Java Programming", platform: "Infosys Springboard", tag: "Core", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0001[1].jpg" },
   { title: "Python Essentials", platform: "Cisco Networking Academy", tag: "Core", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0002[1].jpg" },
@@ -36,6 +43,16 @@ const certifications: Cert[] = [
   { title: "Networking Basics", platform: "Cisco Networking Academy", tag: "Core", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0004[1].jpg" },
   { title: "Blockchain and its Applications", platform: "NPTEL", tag: "Academic", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0006[1].jpg" },
   { title: "Ethical Hacking", platform: "NPTEL", tag: "Academic", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0007[1].jpg" },
+];
+
+const internships: Internship[] = [
+  {
+    title: "AI for Sustainability Intern",
+    organization: "1M1B (One Million for One Billion)",
+    duration: "6 Weeks",
+    description:
+      "Worked on understanding and applying AI concepts to sustainability-focused challenges with responsible, real-world solution design.",
+  },
 ];
 
 type ProjectDomain = "ai" | "iot" | "web" | "health" | "industrial";
@@ -57,7 +74,7 @@ const horizontalProjects: HorizontalProject[] = [
     tag: "Health-tech",
     description:
       "Real-time donor discovery platform that helps recipients locate nearby donors and connect instantly during emergencies.",
-    imageSrc: "/projects/blood-connect.jpg",
+    imageSrc: "/profile/projects/blood-connect.png",
   },
   {
     id: "healhub",
@@ -66,7 +83,7 @@ const horizontalProjects: HorizontalProject[] = [
     tag: "Health-tech",
     description:
       "Digital prescription and smart medicine access platform with secure QR prescriptions and smart medicine dispensing.",
-    imageSrc: "/projects/heal-hub.jpg",
+    imageSrc: "/profile/projects/heal-hub.png",
   },
   {
     id: "cartvision",
@@ -75,7 +92,7 @@ const horizontalProjects: HorizontalProject[] = [
     tag: "AI Project",
     description:
       "AI-powered smart shopping cart that uses computer vision to detect items and enable checkout-free retail experiences.",
-    imageSrc: "/projects/cartvision-ai.jpg",
+    imageSrc: "/profile/projects/cartvision-ai.png",
   },
   {
     id: "aiqc",
@@ -84,16 +101,16 @@ const horizontalProjects: HorizontalProject[] = [
     tag: "Industrial AI",
     description:
       "Computer vision and AI system that automatically detects manufacturing defects in real time on production lines.",
-    imageSrc: "/projects/ai-quality-control.jpg",
+    imageSrc: "/profile/projects/ai-defect-detection.png",
   },
   {
     id: "safestreets",
-    title: "Safe Streets — Smart Women Safety Jacket & Emergency Response System",
+    title: "Safe Streets — Smart Wearable Safety System",
     domain: "iot",
     tag: "IoT + App",
     description:
-      "Smart safety jacket and mobile app that provide real-time emergency alerts and live location tracking in unsafe situations.",
-    imageSrc: "/projects/safe-streets.jpg",
+      "A smart wearable safety system providing SOS alerts and real-time location tracking during emergencies.",
+    imageSrc: "/profile/projects/safe-streets.png",
   },
 ];
 
@@ -193,6 +210,7 @@ export default function Portfolio() {
   const [hoverActive, setHoverActive] = useState(false);
   const [selectedCert, setSelectedCert] = useState<Cert | null>(null);
   const [activeSection, setActiveSection] = useState<string>("about");
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const email = "jebajoshua2006@gmail.com";
   const prefersReducedMotion = useReducedMotion();
 
@@ -283,10 +301,10 @@ export default function Portfolio() {
   const handleContactSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     emailjs
-      .sendForm("service_xngf92d", "template_bc6r4jt", event.currentTarget, "EJ60jT1rmOtsduXxG")
+      .send("service_py1xbnu", "template_bc6r4jt", formData, "EJ60jT1rmOtsduXxG")
       .then(() => {
         alert("Message sent successfully!");
-        event.currentTarget.reset();
+        setFormData({ name: "", email: "", message: "" });
       })
       .catch((error) => {
         console.error(error);
@@ -349,7 +367,7 @@ export default function Portfolio() {
   }, [selectedCert, selectedProject]);
 
   useEffect(() => {
-    const ids = ["about","education","what-i-do","languages","certifications","skills","soft-skills","projects","contact"];
+    const ids = ["about","education","what-i-do","languages","certifications","skills","soft-skills","projects","internships","contact"];
     const sections = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => !!el);
@@ -482,38 +500,6 @@ export default function Portfolio() {
         <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 size-[60vw] rounded-full bg-cyan-500/10 blur-3xl" />
       </motion.div>
 
-      {/* Top-left portfolio title chip */}
-      <motion.div
-        className="fixed top-5 left-5 z-20"
-        initial={{ opacity: 0, y: -6, filter: 'blur(4px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <motion.div
-          whileHover={{ y: -2, scale: 1.01 }}
-          className="group relative inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 backdrop-blur-xl px-4 py-1.5 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.6)]"
-        >
-          <span className="tracking-[0.18em] text-[12px] font-medium uppercase text-white/90">Portfolio</span>
-          <motion.span
-            aria-hidden
-            className="relative inline-block size-2 rounded-full bg-cyan-400/70 shadow-[0_0_10px_2px_rgba(34,211,238,0.35)]"
-            animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.06, 1] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          {/* inner reflection */}
-          <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          {/* thin glass underline */}
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute left-4 right-4 -bottom-1 h-[2px] rounded-full bg-white/25 backdrop-blur-md shadow-[0_0_10px_rgba(255,255,255,0.25)]"
-            initial={{ scaleX: 0, opacity: 0.6 }}
-            whileHover={{ scaleX: 1, opacity: 1 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            style={{ transformOrigin: 'center' }}
-          />
-        </motion.div>
-      </motion.div>
-
       {/* Floating segmented-control navbar */}
       <motion.nav
         className="fixed top-4 left-1/2 -translate-x-1/2 z-20 w-max max-w-[calc(100%-32px)] box-border flex items-center gap-[18px] rounded-full border border-white/15 bg-white/5 px-[14px] py-[8px] backdrop-blur-xl overflow-visible"
@@ -534,6 +520,7 @@ export default function Portfolio() {
             { id: "certifications", label: "Certifications" },
             { id: "skills", label: "Skills" },
             { id: "projects", label: "Projects" },
+            { id: "internships", label: "Internship" },
             { id: "contact", label: "Contact" },
           ].map((item) => (
             <motion.button
@@ -1205,50 +1192,40 @@ export default function Portfolio() {
           />
         </div>
 
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {horizontalProjects.map((project) => {
-              const accent = domainAccent[project.domain];
-              const categoryLabel =
-                project.domain === "ai"
-                  ? "AI"
-                  : project.domain === "health"
-                  ? "Health-Tech"
-                  : project.domain === "iot"
-                  ? "IoT"
-                  : project.domain === "industrial"
-                  ? "Industrial"
-                  : "Web";
-
               return (
                 <motion.article
                   key={project.id}
                   variants={itemVariants}
                   whileHover={hoverLift}
                   whileTap={tapPop}
-                  className="group relative rounded-2xl border border-white/12 bg-white/5 backdrop-blur-xl p-4 sm:p-5 shadow-[0_18px_60px_-30px_rgba(0,0,0,0.9)]"
+                  className="group relative rounded-2xl border border-white/10 bg-slate-900/80 p-4 sm:p-5 shadow-[0_14px_40px_-24px_rgba(0,0,0,0.8)]"
                 >
-                  <div className="relative h-36 sm:h-40 mb-4 rounded-xl overflow-hidden">
+                  <div className="relative h-40 sm:h-44 mb-4 rounded-xl overflow-hidden">
                     <Image
                       src={project.imageSrc}
                       alt={project.title}
                       fill
                       sizes="(min-width: 1280px) 360px, (min-width: 640px) 320px, 100vw"
-                      className="object-cover"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (!target.dataset.fallback) {
+                          target.dataset.fallback = "true";
+                          target.src = "/profile/projects/placeholder.png";
+                        }
+                      }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    <div className="absolute left-3 bottom-3 inline-flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-white/80">
-                        <span className={`h-2 w-2 rounded-full bg-gradient-to-tr ${accent}`} />
-                        <span>{categoryLabel}</span>
-                      </span>
-                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none transition-opacity duration-500 ease-out group-hover:opacity-90" />
+                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/5 group-hover:via-transparent group-hover:to-white/5 transition-colors duration-500 ease-out" />
                   </div>
 
-                  <h3 className="text-sm sm:text-base font-semibold text-white leading-snug">
+                  <h3 className="text-base sm:text-lg font-semibold text-white leading-snug">
                     {project.title}
                   </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-white/70">
+                  <p className="mt-2 text-sm text-white/65">
                     {project.description}
                   </p>
 
@@ -1279,6 +1256,74 @@ export default function Portfolio() {
               );
             })}
           </div>
+        </div>
+      </motion.section>
+
+      {/* Internships */}
+      <motion.section
+        id="internships"
+        className="mt-24 px-6"
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.25 }}
+        onMouseEnter={() => setHoverActive(true)}
+        onMouseLeave={() => setHoverActive(false)}
+      >
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-semibold inline-block relative">Internship</h2>
+          <motion.span
+            aria-hidden
+            initial={{ scaleX: 0, opacity: 0.6 }}
+            whileInView={{ scaleX: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="block mx-auto mt-2 h-[3px] w-28 rounded-full bg-white/20 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.25)]"
+            style={{ transformOrigin: "center" }}
+          />
+          <p className="mt-3 text-white/70 max-w-2xl mx-auto text-sm sm:text-base">
+            Real-world engineering exposure delivering production-ready features and reliable systems.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto grid gap-4 sm:gap-6">
+          {internships.map((role) => (
+            <motion.article
+              key={`${role.title}-${role.organization}`}
+              variants={itemVariants}
+              whileHover={hoverLift}
+              whileTap={tapPop}
+              className="relative rounded-2xl border border-white/12 bg-white/6 backdrop-blur-xl p-5 sm:p-6 shadow-[0_18px_50px_-30px_rgba(0,0,0,0.85)] transition"
+            >
+              <div className="absolute inset-0 rounded-2xl pointer-events-none bg-gradient-to-br from-white/8 via-transparent to-white/4 opacity-60" />
+              <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/70 to-blue-500/70 text-white shadow-[0_10px_30px_-18px_rgba(34,211,238,0.6)]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      className="h-5 w-5"
+                    >
+                      <path d="M3 9.5A2.5 2.5 0 0 1 5.5 7h13A2.5 2.5 0 0 1 21 9.5v6.25A1.25 1.25 0 0 1 19.75 17H4.25A1.25 1.25 0 0 1 3 15.75z" />
+                      <path d="M9 7V6a3 3 0 0 1 6 0v1" />
+                      <path d="M3 12h18" />
+                    </svg>
+                  </span>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold leading-snug">{role.title}</h3>
+                    <p className="text-sm text-white/80">{role.organization}</p>
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/60">{role.duration}</p>
+                    {role.description && (
+                      <p className="text-sm text-white/70 leading-relaxed">{role.description}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.article>
+          ))}
         </div>
       </motion.section>
 
@@ -1333,6 +1378,8 @@ export default function Portfolio() {
                   name="name"
                   type="text"
                   autoComplete="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   className="w-full rounded-2xl bg-white/5 border border-white/12 px-4 py-3 text-sm text-white/90 placeholder:text-white/35 focus:outline-none focus:border-cyan-400/70 focus:bg-white/7 transition-colors duration-200"
                   placeholder="Your name"
                   required
@@ -1350,6 +1397,8 @@ export default function Portfolio() {
                   name="email"
                   type="email"
                   autoComplete="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                   className="w-full rounded-2xl bg-white/5 border border-white/12 px-4 py-3 text-sm text-white/90 placeholder:text-white/35 focus:outline-none focus:border-cyan-400/70 focus:bg-white/7 transition-colors duration-200"
                   placeholder="you@example.com"
                   required
@@ -1368,6 +1417,8 @@ export default function Portfolio() {
                 id="contact-message"
                 name="message"
                 rows={5}
+                value={formData.message}
+                onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
                 className="w-full rounded-2xl bg-white/5 border border-white/12 px-4 py-3 text-sm text-white/90 placeholder:text-white/35 focus:outline-none focus:border-cyan-400/70 focus:bg-white/7 transition-colors duration-200 resize-none"
                 placeholder="Tell me about your project, role, or idea..."
                 required
@@ -1428,6 +1479,54 @@ export default function Portfolio() {
           </motion.div>
         </motion.div>
       </motion.section>
+
+      {/* Footer */}
+      <footer className="mt-10 border-t border-white/10 bg-gradient-to-r from-black/60 via-slate-950/70 to-black/60">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 text-sm text-white/70">
+          <span>© 2025 Jeba Joshua A. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://www.linkedin.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/60 hover:text-white transition-colors"
+              aria-label="LinkedIn"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
+                <path d="M6.94 7.5A1.44 1.44 0 1 1 4.06 7.5a1.44 1.44 0 0 1 2.88 0Z" />
+                <path d="M5.5 10.25v8.25" />
+                <path d="M10 18.5v-6.31" />
+                <path d="M10 12.19c0-.9.73-1.63 1.63-1.63h.12c.86 0 1.57.7 1.57 1.57v6.37" />
+                <path d="M16.53 12.19c0-.9.72-1.63 1.62-1.63h.13c.86 0 1.57.7 1.57 1.57v6.37" />
+                <path d="M10 18.5h2.86" />
+                <path d="M15.32 18.5h4.53" />
+              </svg>
+            </a>
+            <a
+              href="https://github.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/60 hover:text-white transition-colors"
+              aria-label="GitHub"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
+                <path d="M9 19c-4 1.5-4-2.5-6-3" />
+                <path d="M15 21v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 18 3.5 5.07 5.07 0 0 0 17.91 1S16.73.65 15 2.48a13.38 13.38 0 0 0-6 0C7.27.65 6.09 1 6.09 1A5.07 5.07 0 0 0 6 3.5 5.44 5.44 0 0 0 4.5 6.5c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 10 17.13V21" />
+              </svg>
+            </a>
+            <a
+              href="mailto:jebajoshua2006@gmail.com"
+              className="text-white/60 hover:text-white transition-colors"
+              aria-label="Email"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
+                <path d="m4 7 8 5 8-5" />
+                <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
