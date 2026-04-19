@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate, useReducedMotion } from "framer-motion";
@@ -34,9 +34,11 @@ type Internship = {
   organization: string;
   duration: string;
   description?: string;
+  certificateImg?: string;
 };
 
 const certifications: Cert[] = [
+  { title: "Oracle Java SE 17 Developer", platform: "ORACLE", tag: "Java", year: "2026", credentialId: "103405135OCPJSE17", img: "/certificates/oracle-java-se-17.png" },
   { title: "Core Java Programming", platform: "Infosys Springboard", tag: "Core", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0001[1].jpg" },
   { title: "Python Essentials", platform: "Cisco Networking Academy", tag: "Core", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0002[1].jpg" },
   { title: "MongoDB Basics", platform: "MongoDB Students", tag: "Core", year: "2025", credentialUrl: "#", img: "/certificates/IMG-20251214-WA0003[1].jpg" },
@@ -49,9 +51,10 @@ const internships: Internship[] = [
   {
     title: "AI for Sustainability Intern",
     organization: "1M1B (One Million for One Billion)",
-    duration: "6 Weeks",
+    duration: "Dec 2025 - Jan 2026",
     description:
-      "Worked on understanding and applying AI concepts to sustainability-focused challenges with responsible, real-world solution design.",
+      "Worked on understanding and applying AI concepts to sustainability-focused challenges with responsible, real-world solution design. Gained practical experience in Agentic AI and RAG systems.",
+    certificateImg: "/certificates/internship-ai-sustainability.png",
   },
 ];
 
@@ -117,6 +120,16 @@ const horizontalProjects: HorizontalProject[] = [
     description:
       "A smart wearable safety system providing SOS alerts and real-time location tracking during emergencies.",
     imageSrc: "/profile/projects/safe-streets.png",
+  },
+  {
+    id: "vagabound",
+    title: "Vagabound AI — Smart Travel Planning Assistant",
+    domain: "ai",
+    tag: "Travel AI",
+    category: "AI-Powered",
+    description:
+      "Smart travel planning platform that generates personalized trip itineraries based on destination and preferences through AI-powered recommendations.",
+    imageSrc: "/profile/projects/vagabound-ai.png",
   },
 ];
 
@@ -201,6 +214,22 @@ const projectDetailsById: Record<string, Project> = {
     impact: "Improves manufacturing accuracy and reduces human error.",
     tech: ["Python", "OpenCV", "Machine Learning", "Image Processing"],
   },
+  vagabound: {
+    title: "Vagabound AI — Smart Travel Planning Assistant",
+    desc: "AI-powered · Intelligent travel itinerary platform",
+    full:
+      "Smart travel planning platform that generates personalized trip itineraries based on destination, travel duration, and user preferences through AI-powered recommendations.",
+    subtitle: "AI-powered · Intelligent travel itinerary platform",
+    features: [
+      "AI-generated day-wise travel plans for any destination",
+      "Prompt-based itinerary creation (e.g. “Plan 3 days in Bali”)",
+      "Interactive AI chatbot for travel guidance and suggestions",
+      "Personalized recommendations for places, food, and activities",
+      "Instant itinerary generation with dynamic planning logic",
+    ],
+    impact: "Reduces travel planning time by instantly creating customized itineraries with AI assistance.",
+    tech: ["React", "Llama 3", "API Integration", "AI Chat System", "Responsive UI"],
+  },
 };
 
 const domainAccent: Record<ProjectDomain, string> = {
@@ -215,88 +244,111 @@ export default function Portfolio() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [hoverActive, setHoverActive] = useState(false);
   const [selectedCert, setSelectedCert] = useState<Cert | null>(null);
+  const [selectedInternship, setSelectedInternship] = useState<Internship | null>(null);
   const [activeSection, setActiveSection] = useState<string>("about");
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const email = "jebajoshua2006@gmail.com";
   const prefersReducedMotion = useReducedMotion();
 
-  const certRailRef = useRef<HTMLDivElement | null>(null);
-  const certCardRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [certScales, setCertScales] = useState<number[]>(() => certifications.map(() => 1));
-  const [certOpacities, setCertOpacities] = useState<number[]>(() => certifications.map(() => 1));
-  const [certBgOffsets, setCertBgOffsets] = useState<number[]>(() => certifications.map(() => 0));
-  const certRafIdRef = useRef<number | null>(null);
+  const [activeCertIndex, setActiveCertIndex] = useState(0);
+  const certWheelAccumulatorRef = useRef(0);
+  const certWheelResetTimeoutRef = useRef<number | null>(null);
+  const certTouchStartRef = useRef<{ x: number; y: number; at: number } | null>(null);
+  const [viewportWidth, setViewportWidth] = useState(1200);
+  const certCardStep = useMemo(() => {
+    if (viewportWidth < 420) return 148;
+    if (viewportWidth < 640) return 172;
+    if (viewportWidth < 900) return 208;
+    if (viewportWidth < 1200) return 238;
+    return 270;
+  }, [viewportWidth]);
 
-  const updateCertEffects = useMemo(
-    () =>
-      () => {
-        if (!certRailRef.current) return;
-        const containerRect = certRailRef.current.getBoundingClientRect();
-        const viewportCenter = containerRect.left + containerRect.width / 2;
-        const nextScales: number[] = [];
-        const nextOpacities: number[] = [];
-        const nextOffsets: number[] = [];
-
-        certifications.forEach((_, index) => {
-          const el = certCardRefs.current[index];
-          if (!el) {
-            nextScales.push(1);
-            nextOpacities.push(1);
-            nextOffsets.push(0);
-            return;
-          }
-          const rect = el.getBoundingClientRect();
-          const cardCenter = rect.left + rect.width / 2;
-          const distance = Math.abs(cardCenter - viewportCenter);
-          const maxDistance = containerRect.width / 2;
-          const normalized = Math.min(maxDistance > 0 ? distance / maxDistance : 0, 1);
-
-          const scale = 1.05 - normalized * 0.05;
-          const opacity = 1 - normalized * 0.4;
-          const offset = (cardCenter - viewportCenter) * -0.06;
-
-          nextScales.push(scale);
-          nextOpacities.push(opacity);
-          nextOffsets.push(offset);
-        });
-
-        setCertScales(nextScales);
-        setCertOpacities(nextOpacities);
-        setCertBgOffsets(nextOffsets);
-      },
-    []
-  );
-
-  const scheduleCertUpdate = () => {
-    if (certRafIdRef.current !== null) return;
-    certRafIdRef.current = window.requestAnimationFrame(() => {
-      updateCertEffects();
-      certRafIdRef.current = null;
-    });
+  const clamp = (value: number, min: number, max: number) => {
+    return Math.min(max, Math.max(min, value));
   };
 
-  const handleCertScroll = () => {
-    if (prefersReducedMotion) return;
-    scheduleCertUpdate();
+  const wrapCertIndex = (index: number) => {
+    const total = certifications.length;
+    return ((index % total) + total) % total;
+  };
+
+  const getCertOffset = (index: number, center: number) => {
+    const total = certifications.length;
+    let diff = index - center;
+    if (diff > total / 2) diff -= total;
+    if (diff < -total / 2) diff += total;
+    return diff;
+  };
+
+  const moveCertBy = (delta: number) => {
+    if (!delta) return;
+    setActiveCertIndex((prev) => wrapCertIndex(prev + delta));
   };
 
   const handleCertWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    const el = certRailRef.current;
-    if (!el) return;
+    if (prefersReducedMotion) return;
 
-    const deltaX = event.deltaX;
-    const deltaY = event.deltaY;
-    const primaryDelta =
-      Math.abs(deltaY) > Math.abs(deltaX) ? deltaY : deltaX;
-
-    if (primaryDelta === 0) return;
+    const primaryDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+    if (Math.abs(primaryDelta) < 1.5) return;
 
     event.preventDefault();
-    el.scrollLeft += primaryDelta;
-    if (!prefersReducedMotion) {
-      scheduleCertUpdate();
+    certWheelAccumulatorRef.current += primaryDelta;
+
+    const threshold = 90;
+    const steps = Math.trunc(Math.abs(certWheelAccumulatorRef.current) / threshold);
+    if (steps > 0) {
+      const direction = certWheelAccumulatorRef.current > 0 ? 1 : -1;
+      certWheelAccumulatorRef.current -= direction * threshold * steps;
+      moveCertBy(direction * Math.min(steps, 2));
     }
+
+    if (certWheelResetTimeoutRef.current) {
+      clearTimeout(certWheelResetTimeoutRef.current);
+    }
+    certWheelResetTimeoutRef.current = window.setTimeout(() => {
+      certWheelAccumulatorRef.current = 0;
+    }, 160);
   };
+
+  const handleCertTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    certTouchStartRef.current = { x: touch.clientX, y: touch.clientY, at: performance.now() };
+  };
+
+  const handleCertTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    const start = certTouchStartRef.current;
+    if (!start) return;
+
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    const dt = Math.max(1, performance.now() - start.at);
+    const speed = Math.abs(dx) / dt;
+    const threshold = speed > 0.8 ? 26 : 46;
+
+    if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy) * 1.15) {
+      const direction = dx < 0 ? 1 : -1;
+      const steps = Math.min(2, Math.max(1, Math.floor(Math.abs(dx) / 190)));
+      moveCertBy(direction * steps);
+    }
+
+    certTouchStartRef.current = null;
+  };
+
+  useEffect(() => {
+    const syncViewport = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    syncViewport();
+    window.addEventListener("resize", syncViewport);
+    return () => {
+      window.removeEventListener("resize", syncViewport);
+      if (certWheelResetTimeoutRef.current) {
+        clearTimeout(certWheelResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleEmailClick = () => {
     if (navigator && "clipboard" in navigator) {
@@ -365,7 +417,7 @@ export default function Portfolio() {
 
   useEffect(() => {
     const prev = document.body.style.overflow;
-    if (selectedCert || selectedProject) document.body.style.overflow = "hidden";
+    if (selectedCert || selectedProject || selectedInternship) document.body.style.overflow = "hidden";
     else document.body.style.overflow = prev || "";
     return () => {
       document.body.style.overflow = prev || "";
@@ -508,7 +560,7 @@ export default function Portfolio() {
 
       {/* Floating segmented-control navbar */}
       <motion.nav
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-20 w-max max-w-[calc(100%-32px)] box-border flex items-center gap-[18px] rounded-full border border-white/15 bg-white/5 px-[14px] py-[8px] backdrop-blur-xl overflow-visible"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 w-max max-w-[calc(100%-32px)] box-border flex items-center gap-[18px] rounded-full border border-white/15 bg-white/5 px-[14px] py-[8px] backdrop-blur-xl overflow-visible"
         onMouseEnter={() => setHoverActive(true)}
         onMouseLeave={() => setHoverActive(false)}
         style={{ backdropFilter: navBackdrop, backgroundColor: navBg }}
@@ -548,26 +600,44 @@ export default function Portfolio() {
       {/* Hero Section */}
       <motion.section
         id="about"
-        className="flex items-center justify-center mt-20 px-6"
+        className="mt-20 flex flex-col items-center justify-center px-6"
         variants={sectionVariants}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
         >
           <motion.div
+            aria-hidden
+            initial={{ opacity: 0, x: -12, scale: 0.96 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
+            className="mb-5 w-full max-w-5xl"
+          >
+            <div className="relative inline-flex items-center gap-3 rounded-full border border-cyan-300/35 bg-slate-950/45 px-5 py-2.5 backdrop-blur-2xl shadow-[0_18px_40px_-24px_rgba(14,165,233,0.95),inset_0_0_0_1px_rgba(103,232,249,0.18)]">
+              <span className="h-2.5 w-2.5 rounded-full bg-cyan-300 shadow-[0_0_0_4px_rgba(34,211,238,0.2),0_0_18px_rgba(34,211,238,0.95)]" />
+              <span className="text-[0.72rem] font-medium tracking-[0.28em] text-cyan-100/95">PORTFOLIO</span>
+              <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-r from-white/12 via-transparent to-cyan-300/12" />
+            </div>
+          </motion.div>
+
+          <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 12, filter: "blur(6px)" }}
             animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-5xl rounded-3xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_20px_60px_-20px_rgba(0,0,0,0.6)]"
+            className="relative w-full max-w-5xl rounded-3xl border border-white/8 bg-gradient-to-br from-white/[0.05] via-transparent to-transparent backdrop-blur-3xl shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
           >
-            <div className="hero-content p-8 md:p-12">
-              <div className="profile-img-wrapper mx-auto md:mx-0">
+            {/* Added a subtle inner glow mask for better blending */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            
+            <div className="hero-content p-8 md:p-12 relative z-10">
+              <div className="relative h-[200px] w-[160px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl profile-img-wrapper">
                 <Image
                   src="/profile.jpg"
                   alt="Jeba Joshua A"
-                  width={160}
-                  height={200}
-                  className="profile-img"
+                  fill
+                  sizes="160px"
+                  className="object-cover"
                   priority
                 />
               </div>
@@ -778,33 +848,40 @@ export default function Portfolio() {
             <motion.div
               key={l.name}
               variants={itemVariants}
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.985 }}
-              transition={{ duration: 0.35, ease }}
-              className="group relative min-w-[220px] px-5 py-3 rounded-full border border-white/15 bg-white/8 backdrop-blur-xl shadow-[0_12px_30px_-18px_rgba(0,0,0,0.6)]"
+              initial={{ borderColor: "rgba(34, 211, 238, 0.2)", scale: 1 }}
+              whileHover={{ 
+                y: -8, 
+                scale: 1.05, 
+                borderColor: "rgba(34, 211, 238, 0.6)",
+              }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative min-w-[190px] px-8 py-6 rounded-[2.5rem] border overflow-hidden transition-all duration-500 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)]"
             >
-              {/* blurred, desaturated flag on hover, embedded in glass */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+              {/* Layer 1: High-Visibility Monochrome Flag (Themed Silhouette) */}
+              <div 
+                className="absolute inset-0 z-0 select-none transition-transform duration-700 group-hover:scale-110 grayscale brightness-[2] saturate-0 opacity-[0.3] group-hover:opacity-[0.45]"
                 style={{
                   backgroundImage: `url(https://flagcdn.com/${l.flag}.svg)`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  filter: 'grayscale(100%) blur(2px) saturate(60%)',
+                  backgroundRepeat: 'no-repeat'
                 }}
               />
-              <div className="relative z-10 flex items-center justify-between gap-6">
-                <div className="text-sm">
-                  <div className="font-medium leading-tight">{l.name}</div>
-                  <div className="text-[12px] text-white/70">{l.level}</div>
-                </div>
+
+              {/* Layer 2: Ultra-Premium Frosted Glass Layer (Lighter Frost) */}
+              <div className="absolute inset-0 z-10 bg-white/[0.03] backdrop-blur-xl transition-colors duration-500 group-hover:bg-white/[0.06]" />
+
+              {/* Layer 3: Content */}
+              <div className="relative z-20 flex flex-col items-center text-center">
+                <span className="text-xl font-black text-white tracking-tight drop-shadow-md">{l.name}</span>
+                <span className="text-[11px] font-black text-cyan-300 uppercase tracking-[0.25em] mt-1.5 opacity-90 drop-shadow-sm">{l.level}</span>
               </div>
-              {/* inner reflection */}
-              <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-white/12 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              {/* soft edge glow */}
-              <span className="pointer-events-none absolute -inset-px rounded-full shadow-[0_0_26px_0_rgba(34,211,238,0.22),0_0_2px_0_rgba(34,211,238,0.35)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              {/* no progress bars or percentages */}
+
+              {/* Permanent inner glow */}
+              <span className="pointer-events-none absolute inset-0 z-30 bg-gradient-to-br from-white/10 via-transparent to-cyan-500/5 opacity-100" />
+              
+              {/* Dynamic pulse highlight on hover */}
+              <span className="pointer-events-none absolute -inset-px z-40 rounded-[2.5rem] shadow-[inset_0_0_20px_rgba(34,211,238,0.3)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </motion.div>
           ))}
         </motion.div>
@@ -833,74 +910,106 @@ export default function Portfolio() {
             style={{ transformOrigin: 'center' }}
           />
         </div>
-        <div className="max-w-5xl mx-auto overflow-x-clip">
-          <div className="relative pt-6">
-            <div className="pointer-events-none absolute left-0 right-0 top-10 h-px bg-gradient-to-r from-white/5 via-white/20 to-white/5" />
-            <div
-              ref={certRailRef}
-              className="relative flex gap-6 overflow-x-auto pb-4 no-scrollbar"
-              onScroll={handleCertScroll}
-              onWheel={handleCertWheel}
-            >
-              {certifications.map((cert, index) => {
-                const scale = prefersReducedMotion ? 1 : certScales[index] ?? 1;
-                const opacity = prefersReducedMotion ? 1 : certOpacities[index] ?? 1;
-                const bgOffset = prefersReducedMotion ? 0 : certBgOffsets[index] ?? 0;
-                const isDominant = !prefersReducedMotion && scale > 1.025;
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+          {/* Side Fading Masks for Infinite Blending */}
+          <div className="absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent z-20 pointer-events-none hidden md:block" />
+          <div className="absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-slate-950 via-slate-950/60 to-transparent z-20 pointer-events-none hidden md:block" />
 
-                return (
-                  <motion.button
-                    key={cert.title}
-                    type="button"
-                    onClick={() => setSelectedCert(cert)}
-                    whileHover={
-                      prefersReducedMotion ? undefined : { y: -4, scale: 1.02 }
+          <div
+            className="relative h-[350px] sm:h-[380px] md:h-[410px] [perspective:2200px] overflow-visible"
+            onWheel={handleCertWheel}
+            onTouchStart={handleCertTouchStart}
+            onTouchEnd={handleCertTouchEnd}
+          >
+            {/* Removed the slab-like container background */}
+            {certifications.map((cert, index) => {
+              const offset = getCertOffset(index, activeCertIndex);
+              const abs = Math.abs(offset);
+              const visible = abs <= 3;
+              const scale = prefersReducedMotion ? 1 : clamp(1 - abs * 0.12, 0.78, 1);
+              const depth = prefersReducedMotion ? 0 : abs === 0 ? 175 : abs === 1 ? 30 : -110 - (abs - 2) * 95;
+              const rotateY = prefersReducedMotion ? 0 : clamp(-offset * 17, -28, 28);
+              const translateX = offset * certCardStep;
+              const translateY = prefersReducedMotion ? 0 : abs === 0 ? -14 : abs === 1 ? 2 : 12;
+              const opacity = prefersReducedMotion ? 1 : abs === 0 ? 1 : abs === 1 ? 0.68 : abs === 2 ? 0.34 : 0.16;
+              const blur = prefersReducedMotion ? 0 : abs === 0 ? 0 : abs === 1 ? 0.8 : abs === 2 ? 1.9 : 2.8;
+              const brightness = prefersReducedMotion ? 1 : abs === 0 ? 1.08 : abs === 1 ? 0.88 : 0.66;
+              const zIndex = 100 - abs * 10;
+              const isActive = abs === 0;
+
+              return (
+                <button
+                  key={cert.title}
+                  type="button"
+                  onClick={() => {
+                    if (isActive) {
+                      setSelectedCert(cert);
+                    } else {
+                      setActiveCertIndex(index);
                     }
-                    whileTap={
-                      prefersReducedMotion ? undefined : { scale: 0.98 }
-                    }
-                    ref={(el) => {
-                      certCardRefs.current[index] = el;
-                    }}
-                    style={{
-                      scale,
-                      opacity,
-                    }}
-                    className={`group relative flex-shrink-0 text-left rounded-2xl border px-5 py-4 min-w-[240px] sm:min-w-[260px] md:min-w-[280px] transition-colors ${
-                      isDominant
-                        ? "bg-white/10 border-white/35 shadow-[0_20px_50px_-28px_rgba(0,0,0,0.9)]"
-                        : "bg-white/[0.04] border-white/15"
+                  }}
+                  aria-hidden={!visible}
+                  tabIndex={visible ? 0 : -1}
+                  style={{
+                    zIndex,
+                    opacity: visible ? opacity : 0,
+                    transform: `translate3d(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px), ${depth}px) rotateY(${rotateY}deg) scale(${scale})`,
+                    filter: `blur(${blur}px) brightness(${brightness})`,
+                    transitionDuration: prefersReducedMotion ? "0ms" : "620ms",
+                    transitionTimingFunction: "cubic-bezier(0.19, 1, 0.22, 1)",
+                    willChange: "transform, opacity, filter",
+                  }}
+                  className={`group absolute left-1/2 top-1/2 w-[min(82vw,360px)] rounded-[2.5rem] border px-6 py-5 text-left backdrop-blur-3xl transition-[transform,opacity,filter,border-color,background-color,box-shadow] ${
+                      isActive
+                        ? "border-cyan-400/50 bg-slate-950/70 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8),inset_0_0_20px_rgba(34,211,238,0.15)]"
+                        : "border-white/5 bg-white/[0.04] backdrop-blur-xl shadow-none hover:border-white/20"
+                  }`}
+                >
+                  <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/22 via-transparent to-cyan-300/10" />
+                  <div
+                    className={`pointer-events-none absolute -inset-px rounded-3xl transition-opacity duration-[620ms] ${
+                      isActive
+                        ? "opacity-100 shadow-[0_0_0_1px_rgba(165,243,252,0.38),0_0_52px_rgba(56,189,248,0.48)]"
+                        : "opacity-30"
                     }`}
-                  >
-                    <motion.div
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-white/5 opacity-30"
-                      style={{ x: bgOffset }}
-                    />
-                    <div className="relative space-y-2">
-                      <div className="text-sm font-semibold leading-snug">
-                        {cert.title}
-                      </div>
-                      <div className="text-xs text-white/80">
-                        {cert.platform}
-                      </div>
-                      <div className="flex flex-wrap gap-2 pt-1 text-[11px] text-white/75">
-                        {cert.tag && (
-                          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/20">
-                            {cert.tag}
-                          </span>
-                        )}
-                        {cert.year && (
-                          <span className="px-2 py-0.5 rounded-full border border-white/20">
-                            {cert.year}
-                          </span>
-                        )}
-                      </div>
+                  />
+                  <div className="relative space-y-2.5">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/20 px-2.5 py-1 text-[10px] tracking-[0.16em] text-white/80">
+                      <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.9)]" />
+                      CERTIFICATION
                     </div>
-                  </motion.button>
-                );
-              })}
-            </div>
+                    <div className="text-[15px] font-semibold leading-snug text-white/95">{cert.title}</div>
+                    <div className="text-xs text-white/75">{cert.platform}</div>
+                    <div className="flex flex-wrap gap-2 pt-1 text-[11px] text-white/75">
+                      {cert.tag && (
+                        <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5">
+                          {cert.tag}
+                        </span>
+                      )}
+                      {cert.year && (
+                        <span className="rounded-full border border-white/20 px-2.5 py-0.5">
+                          {cert.year}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-2">
+            {certifications.map((cert, index) => {
+              const isActive = index === activeCertIndex;
+              return (
+                <button
+                  key={`${cert.title}-dot`}
+                  type="button"
+                  aria-label={`Go to ${cert.title}`}
+                  onClick={() => setActiveCertIndex(index)}
+                  className={`h-2 rounded-full transition-all duration-500 ${isActive ? "w-6 bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.9)]" : "w-2 bg-white/35 hover:bg-white/55"}`}
+                />
+              );
+            })}
           </div>
         </div>
       </motion.section>
@@ -949,13 +1058,20 @@ export default function Portfolio() {
                 )}
                 {(selectedCert.img || selectedCert.image) && (
                   <div className="mt-6 rounded-xl overflow-hidden border border-white/10 bg-white/5 relative w-full h-[60vh] max-h-[70vh]">
-                    <Image
-                      src={(selectedCert.img || selectedCert.image)!}
-                      alt="Certificate preview"
-                      fill
-                      className="object-contain opacity-90"
-                      loading="lazy"
-                    />
+                    {selectedCert.img || selectedCert.image ? (
+                      <Image
+                        src={(selectedCert.img || selectedCert.image)!}
+                        alt="Certificate preview"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 600px"
+                        className="object-contain opacity-90"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-white/20">
+                        Certificate Image Not Found
+                      </div>
+                    )}
                   </div>
                 )}
               </motion.div>
@@ -1034,13 +1150,14 @@ export default function Portfolio() {
                     {(selectedProject?.tech ?? ["React","Java","MongoDB"]).map(tag => (
                       <motion.span
                         key={tag}
-                        whileHover={hoverLift}
-                        whileTap={tapPop}
-                        className="group relative px-4 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md"
+                        initial={{ y: 0, scale: 1, borderColor: "rgba(255,255,255,0.1)" }}
+                        whileHover={{ y: -2, scale: 1.05, borderColor: "rgba(34,211,238,0.4)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="group relative px-4 py-1 rounded-full bg-white/10 border backdrop-blur-md"
                       >
                         <span className="relative z-10">{tag}</span>
                         <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <span className="pointer-events-none absolute -inset-px rounded-full shadow-[0_0_24px_0_rgba(34,211,238,0.25),0_0_2px_0_rgba(34,211,238,0.35)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className="pointer-events-none absolute -inset-px rounded-full shadow-[0_0_24px_0_rgba(34,211,238,0.25)] opacity-0 group-hover:opacity-100 transition-opacity" />
                       </motion.span>
                     ))}
                   </div>
@@ -1122,13 +1239,19 @@ export default function Portfolio() {
             <motion.span
               key={skill}
               variants={itemVariants}
-              whileHover={hoverLift}
-              whileTap={tapPop}
-              className="group relative px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 transition-colors"
+              initial={{ borderColor: "rgba(34, 211, 238, 0.25)", backgroundColor: "rgba(6, 182, 212, 0.15)" }}
+              whileHover={{ 
+                scale: 1.08, 
+                y: -2, 
+                borderColor: "rgba(34, 211, 238, 0.45)",
+                backgroundColor: "rgba(6, 182, 212, 0.25)"
+              }}
+              whileTap={{ scale: 0.96 }}
+              className="group relative px-6 py-2.5 rounded-full backdrop-blur-md border text-white/90 shadow-sm transition-all duration-300"
             >
-              {skill}
-              <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <span className="pointer-events-none absolute -inset-px rounded-full shadow-[0_0_22px_0_rgba(147,197,253,0.25),0_0_2px_0_rgba(147,197,253,0.35)] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="relative z-10">{skill}</span>
+              <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-white/10 to-transparent opacity-20 group-hover:opacity-40 transition-opacity" />
+              <span className="pointer-events-none absolute -inset-px rounded-full shadow-[0_0_20px_0_rgba(34,211,238,0.2)] opacity-0 group-hover:opacity-100 transition-opacity" />
             </motion.span>
           ))}
         </motion.div>
@@ -1162,13 +1285,19 @@ export default function Portfolio() {
             <motion.span
               key={s}
               variants={itemVariants}
-              whileHover={{ y: -2, scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="group relative px-5 py-2 rounded-full bg-white/8 backdrop-blur-xl border border-white/15 text-white/90"
+              initial={{ borderColor: "rgba(34, 211, 238, 0.2)", backgroundColor: "rgba(6, 182, 212, 0.1)" }}
+              whileHover={{ 
+                y: -3, 
+                scale: 1.05, 
+                borderColor: "rgba(34, 211, 238, 0.4)",
+                backgroundColor: "rgba(6, 182, 212, 0.2)" 
+              }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative px-6 py-2.5 rounded-full backdrop-blur-xl border text-white/85 transition-all duration-300"
             >
-              {s}
-              <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <span className="pointer-events-none absolute -inset-px rounded-full shadow-[0_0_18px_0_rgba(147,197,253,0.18),0_0_2px_0_rgba(147,197,253,0.3)] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="relative z-10">{s}</span>
+              <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-400/5 to-transparent opacity-100" />
+              <span className="pointer-events-none absolute -inset-px rounded-full shadow-[0_0_15px_0_rgba(34,211,238,0.15)] opacity-0 group-hover:opacity-100 transition-opacity" />
             </motion.span>
           ))}
         </motion.div>
@@ -1194,7 +1323,7 @@ export default function Portfolio() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="block mx-auto mt-2 h-[3px] w-28 rounded-full bg-white/20 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.25)]"
-            style={{ transformOrigin: 'center' }}
+            style={{ transformOrigin: "center" }}
           />
         </div>
 
@@ -1327,11 +1456,129 @@ export default function Portfolio() {
                     )}
                   </div>
                 </div>
+                {role.certificateImg && (
+                  <div className="sm:text-right mt-2 sm:mt-0">
+                    <button
+                      onClick={() => setSelectedInternship(role)}
+                      className="group relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/25 hover:bg-cyan-500/20 transition-all text-sm text-cyan-200"
+                    >
+                      <span className="relative z-10 font-medium">View Certificate</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      >
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                      <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.article>
           ))}
         </div>
       </motion.section>
+
+      <AnimatePresence>
+        {selectedInternship && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: "blur(10px)" }}
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="absolute inset-0 bg-black/70" onClick={() => setSelectedInternship(null)} />
+            <div className="relative h-full w-full flex items-center justify-center p-4">
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                initial={{ opacity: 0, scale: 0.95, y: 20, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.98, y: 15, filter: "blur(6px)" }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="relative bg-white/10 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 md:p-10 max-w-3xl w-full shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] flex flex-col gap-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                      {selectedInternship.title}
+                    </h3>
+                    <p className="text-cyan-300 font-medium">
+                      {selectedInternship.organization}
+                    </p>
+                    <p className="text-white/60 text-sm">{selectedInternship.duration}</p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedInternship(null)}
+                    className="p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition"
+                    aria-label="Close"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="h-5 w-5"
+                    >
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-inner group">
+                  {selectedInternship.certificateImg ? (
+                    <Image
+                      src={selectedInternship.certificateImg!}
+                      alt={`${selectedInternship.title} Certificate`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 800px"
+                      className="object-contain"
+                      priority
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-white/20">
+                      Certificate Image Not Found
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <p className="text-sm text-white/50 italic font-light">
+                    Verified Digital Certificate of Completion
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={selectedInternship.certificateImg!}
+                      download
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 transition-all text-sm font-medium"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="h-4 w-4"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                      </svg>
+                      Download
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <motion.section
         id="contact"
